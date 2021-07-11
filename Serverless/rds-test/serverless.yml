@@ -1,0 +1,28 @@
+service: rds-test
+
+variablesResolutionMode: 20210326
+
+custom:
+  secrets: ${file(secrets.json)}
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  region: ap-south-1
+  environment:
+    NODE_ENV: ${self:custom.secrets.NODE_ENV}
+    DB_NAME: ${ssm:/database/myDemoDB/name}
+    DB_USER: ${ssm:/database/myDemoDB/user}
+    DB_PASSWORD: ${ssm:/database/myDemoDB/password}
+    DB_HOST: ${ssm:/database/myDemoDB/endpoint}
+    DB_PORT: ${self:custom.secrets.DB_PORT}
+
+functions:
+  healthCheck:
+    handler: handler.healthCheck
+    events:
+      - http:
+          method: GET
+          path: /
+          cors: true
